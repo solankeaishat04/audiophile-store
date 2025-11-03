@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: Global styling tweaks */
+body {
+  font-family: 'Manrope', sans-serif;
+  background-color: #ffffff;
+  color: #000000;
+}
