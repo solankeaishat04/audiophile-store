@@ -1,7 +1,7 @@
 // convex/orders.ts
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { internal } from "./_generated/api"; // Add this import
+import { internal } from "./_generated/api";
 
 export const createOrder = mutation({
   args: {
@@ -43,26 +43,32 @@ export const createOrder = mutation({
       orderDate: Date.now(),
     });
 
-    // Schedule email sending (non-blocking) - FIXED
-    await ctx.scheduler.runAfter(0, internal.email.sendOrderConfirmation, {
-      orderId: orderId,
-      customerEmail: args.customer.email,
-      customerName: args.customer.name,
-      items: args.items.map(item => ({
-        productName: item.productName,
-        price: item.price,
-        quantity: item.quantity,
-      })),
-      totals: args.totals,
-      shipping: args.shipping,
-    });
-
     console.log("✅ Order created:", {
       orderId,
       customer: args.customer.email,
       total: args.totals.grandTotal,
       items: args.items.length,
     });
+
+    // Schedule email sending (non-blocking)
+    try {
+      await ctx.scheduler.runAfter(0, internal.email.sendOrderConfirmation, {
+        orderId: orderId,
+        customerEmail: args.customer.email,
+        customerName: args.customer.name,
+        items: args.items.map(item => ({
+          productName: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+        totals: args.totals,
+        shipping: args.shipping,
+      });
+      console.log("📧 Email scheduled for:", args.customer.email);
+    } catch (error) {
+      console.error("❌ Failed to schedule email:", error);
+      // Don't throw - we don't want email failures to prevent order creation
+    }
 
     return orderId;
   },
