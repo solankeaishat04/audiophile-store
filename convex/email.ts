@@ -26,7 +26,7 @@ export const sendOrderConfirmation = internalAction({
       country: v.string(),
     }),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, args) => {
     try {
       // Generate email content
       const emailContent = generateEmailTemplate(args);
@@ -38,11 +38,11 @@ export const sendOrderConfirmation = internalAction({
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Authorization': `Bearer re_KhsP5Mz2_CtDrfu8pBRkPt72xVuk7dCGP`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Audiophile <onboarding@resend.dev>', // Use your verified domain later
+          from: 'Audiophile <onboarding@resend.dev>',
           to: [args.customerEmail],
           subject: `Order Confirmation #${args.orderId}`,
           html: emailContent,
@@ -185,7 +185,7 @@ function generateEmailTemplate(args: any): string {
             </div>
             
             <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL || 'https://youraudiophileapp.com'}/orders/${args.orderId}" class="button">
+                <a href="#" class="button">
                     View Your Order
                 </a>
             </div>
