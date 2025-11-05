@@ -48,12 +48,9 @@ export default function Checkout() {
   const [orderDetails, setOrderDetails] = useState<{
     orderId: string;
     grandTotal: number;
-    items: Array<{
-      productName: string;
-      price: number;
-      quantity: number;
-    }>;
   } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [confirmationItems, setConfirmationItems] = useState<any[]>([]); // Store items for confirmation modal
 
   // Add this useEffect to close any cart modal when checkout page loads
   useEffect(() => {
@@ -138,7 +135,10 @@ export default function Checkout() {
       const tax = Math.round(subtotal * 0.08);
       const grandTotal = subtotal + shipping + tax;
 
-      // Create order in Convex with null checks
+      // Store cart items for confirmation modal BEFORE clearing
+      setConfirmationItems([...cartItems]);
+
+      // Create order in Convex with proper structure
       const orderId = await createOrder({
         customer: {
           name: formData.name,
@@ -175,16 +175,13 @@ export default function Checkout() {
       setOrderDetails({
         orderId,
         grandTotal,
-        items: cartItems.map(item => ({
-          productName: item.productName || "Unknown Product",
-          price: item.price || 0,
-          quantity: item.quantity
-        }))
       });
 
-      // Clear cart and show confirmation modal (NOT navigate)
-      await clearCart();
+      // Show confirmation modal BEFORE clearing cart
       setShowConfirmation(true);
+
+      // THEN clear the cart after showing the modal
+      await clearCart();
 
     } catch (error) {
       console.error("Checkout error:", error);
@@ -206,11 +203,11 @@ export default function Checkout() {
   const tax = Math.round(getTotalPrice() * 0.08);
   const grandTotal = getTotalPrice() + shippingCost + tax;
 
-  // Calculate first item and other items count for the modal
-  const firstItem = orderDetails?.items[0];
-  const otherItemsCount = orderDetails ? orderDetails.items.length - 1 : 0;
+  // Use confirmationItems for modal display instead of cartItems
+  const firstItem = confirmationItems?.[0];
 
-  if (!cartItems || cartItems.length === 0) {
+  // Don't show empty cart page if we're showing the confirmation modal
+  if ((!cartItems || cartItems.length === 0) && !showConfirmation) {
     return (
       <>
         <Navbar />
@@ -410,7 +407,7 @@ export default function Checkout() {
                   {formData.paymentMethod === "Cash on Delivery" && (
                     <div className="flex items-center gap-4 text-gray-600">
                       <div className="w-12 h-12">
-                        <img src="/images/cash-delivery-icon.svg" alt="Cash on Delivery" />
+                        <img src="/image/cash.svg" alt="Cash on Delivery" />
                       </div>
                       <p>The 'Cash on Delivery' option enables you to pay in cash when our delivery courier arrives at your residence. Just make sure your address is correct so that your order will not be cancelled.</p>
                     </div>
@@ -426,7 +423,7 @@ export default function Checkout() {
                 
                 {/* Cart Items */}
                 <div className="space-y-6 mb-8">
-                  {cartItems.map((item) => (
+                  {cartItems?.map((item) => (
                     <div key={item._id} className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
@@ -485,8 +482,8 @@ export default function Checkout() {
       </div>
       <Footer />
 
-      {/* Order Confirmation Modal - Now directly in Checkout component */}
-      {showConfirmation && orderDetails && (
+      {/* Order Confirmation Modal */}
+      {showConfirmation && orderDetails && confirmationItems.length > 0 && (
         <>
           {/* Backdrop */}
           <div 
@@ -498,9 +495,7 @@ export default function Checkout() {
           <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-8 w-[90%] max-w-[540px] z-50 shadow-2xl">
             {/* Large Orange Checkmark Icon */}
             <div className="w-20 h-20 bg-[#D87D4A] rounded-full flex items-center justify-center mb-6 mx-auto">
-              <svg width="30" height="24" viewBox="0 0 30 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 12L10 18L27 4" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <img src="/image/check.png" alt="Order Confirmed" />
             </div>
 
             <h2 className="text-3xl font-bold mb-4 text-center uppercase tracking-wide">Thank you for your order</h2>
@@ -514,12 +509,20 @@ export default function Checkout() {
                 {firstItem && (
                   <div className="flex justify-between items-center mb-4">
                     <div className="flex items-center gap-4 flex-1">
-                      <div className="w-12 h-12 bg-gray-300 rounded-md flex items-center justify-center">
-                        <span className="text-gray-500 text-xs">IMG</span>
+                      <div className="w-12 h-12 bg-gray-300 rounded-md flex items-center justify-center overflow-hidden">
+                        {firstItem.imageUrl ? (
+                          <img 
+                            src={firstItem.imageUrl} 
+                            alt={firstItem.productName} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-gray-500 text-xs">IMG</span>
+                        )}
                       </div>
                       <div className="flex-1">
                         <p className="font-bold text-sm">{firstItem.productName}</p>
-                        <p className="text-gray-500 text-sm">$ {firstItem.price.toLocaleString()}</p>
+                        <p className="text-gray-500 text-sm">$ {(firstItem.price || 0).toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="text-gray-500 font-bold">
@@ -529,10 +532,10 @@ export default function Checkout() {
                 )}
 
                 {/* Other Items Count */}
-                {otherItemsCount > 0 && (
+                {confirmationItems.length > 1 && (
                   <div className="border-t border-gray-300 pt-4 text-center">
                     <p className="text-gray-600 text-sm">
-                      and {otherItemsCount} other item(s)
+                      and {confirmationItems.length - 1} other item(s)
                     </p>
                   </div>
                 )}
