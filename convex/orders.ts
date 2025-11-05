@@ -1,7 +1,7 @@
 // convex/orders.ts
 import { mutation, query } from "./_generated/server";
-import { v } from "convex/values";
 import { internal } from "./_generated/api";
+import { v } from "convex/values";
 
 export const createOrder = mutation({
   args: {
@@ -36,44 +36,68 @@ export const createOrder = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    // Create the order first
-    const orderId = await ctx.db.insert("orders", {
-      ...args,
-      status: "confirmed",
-      orderDate: Date.now(),
-    });
-
-    console.log("✅ Order created:", {
-      orderId,
-      customer: args.customer.email,
-      total: args.totals.grandTotal,
-      items: args.items.length,
-    });
-
-    // Schedule email sending (non-blocking)
     try {
+      // Create order in database first
+      const orderId = await ctx.db.insert("orders", {
+        ...args,
+        status: "confirmed",
+        orderDate: Date.now(),
+      });
+
+      console.log("✅ Order created:", orderId);
+
+      // Schedule email sending (non-blocking)
       await ctx.scheduler.runAfter(0, internal.email.sendOrderConfirmation, {
         orderId: orderId,
-        customerEmail: args.customer.email,
         customerName: args.customer.name,
+        customerEmail: args.customer.email,
+        customerPhone: args.customer.phone,
+        shippingAddress: {
+          street: args.shipping.address,
+          city: args.shipping.city,
+          state: args.shipping.city,
+          zipCode: args.shipping.zipCode,
+          country: args.shipping.country,
+        },
         items: args.items.map(item => ({
-          productName: item.productName,
+          id: item.productId,
+          name: item.productName,
           price: item.price,
           quantity: item.quantity,
         })),
-        totals: args.totals,
-        shipping: args.shipping,
+        subtotal: args.totals.subtotal,
+        shipping: args.totals.shipping,
+        taxes: args.totals.tax,
+        grandTotal: args.totals.grandTotal,
       });
-      console.log("📧 Email scheduled for:", args.customer.email);
-    } catch (error) {
-      console.error("❌ Failed to schedule email:", error);
-      // Don't throw - we don't want email failures to prevent order creation
-    }
 
-    return orderId;
+      console.log("📧 Email scheduled for:", args.customer.email);
+      return orderId;
+
+    } catch (error) {
+      console.error("❌ Failed to create order:", error);
+      throw new Error("Failed to create order");
+    }
   },
 });
 
+// FIXED: Query to get order by string ID from URL
+export const getOrderById = query({
+  args: { orderId: v.string() },
+  handler: async (ctx, args) => {
+    // Since orderId from URL is a string, we need to convert it to a Convex ID
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const order = await ctx.db.get(args.orderId as any);
+      return order;
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      return null;
+    }
+  },
+});
+
+// Keep your existing getOrder query for internal use
 export const getOrder = query({
   args: {
     orderId: v.id("orders"),

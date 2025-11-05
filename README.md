@@ -1,73 +1,109 @@
-# React + TypeScript + Vite
+🎧 Audiophile E-Commerce Website
+A pixel-perfect e-commerce website built with React, TypeScript, and Convex backend for audiophile equipment. Features a complete shopping experience with product browsing, cart management, and automated email confirmations.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+✨ Features
+Responsive Design: Optimized for mobile, tablet, and desktop
 
-Currently, two official plugins are available:
+Product Catalog: Headphones, speakers, and earphones with detailed pages
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Shopping Cart: Add/remove items, update quantities with persistent storage
 
-## React Compiler
+Secure Checkout: Comprehensive form validation and payment processing
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Order Management: Orders stored securely in Convex backend
 
-## Expanding the ESLint configuration
+Email Confirmation: Automated HTML email sending via Resend API
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Order Tracking: View order details and confirmation pages
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+🛠️ Tech Stack
+Frontend: React, TypeScript, Vite, Tailwind CSS
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Backend: Convex (Database & Serverless Functions)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Routing: React Router
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Email Service: Resend API
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Deployment: Vercel (Frontend) + Convex Cloud (Backend)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+State Management: React Hooks + Convex Queries
+
+🚀 Getting Started
+1. Clone the Repository
+bash
+git clone https://github.com/your-username/audiophile-store.git
+cd audiophile-store
+2. Install Dependencies
+bash
+npm install
+3. Set Up Environment Variables
+Create a .env file in the root directory:
+
+env
+VITE_CONVEX_URL=your_production_convex_url
+RESEND_API_KEY=your_resend_api_key
+4. Set Up Convex
+bash
+npx convex dev
+npx convex deploy
+5. Run Development Server
+bash
+npm run dev
+Open http://localhost:5173 to view the app
+Configuration
+Convex Setup
+bash
+# Initialize Convex
+npx convex init
+
+# Deploy to production
+npx convex deploy
+
+# Export/import data between environments
+npx convex export --path convex-export.zip
+npx convex import --replace-all convex-export.zip
+Email Configuration
+Update convex/email.ts with your:
+
+Resend API key
+
+Verified sender email
+
+Custom email template styling
+
+📧 Email Features
+Order confirmation with full details
+
+Professional HTML template
+
+Product images and pricing
+
+Shipping information
+
+Grand total breakdown
+
+Mobile-responsive design
+
+🚀 Deployment
+Frontend (Vercel)
+Connect GitHub repository to Vercel
+
+Set environment variables in Vercel dashboard
+
+Automatic deployments on git push
+
+Backend (Convex)
+bash
+npx convex deploy
+📝 Notes
+Ensure all environment variables are properly set for production
+
+Verify email domain with Resend for sending capabilities
+
+Test checkout flow thoroughly before production deployment
+
+Maintain pixel-perfect design across all screen sizes
+
+✨ Live Demo
+View Live Application

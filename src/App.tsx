@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import Headphones from "./pages/Headphones";
 import Product from "./pages/Product";
 import Cart from "./pages/carts";
+import OrderDetails from "./pages/orderDetails";
 
 import "./App.css";
 import Speakers from "./pages/Speaker";
@@ -45,6 +46,7 @@ function AppContent() {
         <Route path="/product/:slug" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/orders/:orderId" element={<OrderDetails/>}/>
 
         {/* Dynamic category route last */}
         <Route path="/:category" element={<Category />} />
