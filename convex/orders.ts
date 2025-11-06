@@ -2,7 +2,7 @@
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel"; // Add 'type' keyword
+import type { Id } from "./_generated/dataModel";
 
 export const createOrder = mutation({
   args: {
@@ -50,26 +50,25 @@ export const createOrder = mutation({
       // Schedule email sending (non-blocking)
       await ctx.scheduler.runAfter(0, internal.email.sendOrderConfirmation, {
         orderId: orderId,
-        customerName: args.customer.name,
-        customerEmail: args.customer.email,
-        customerPhone: args.customer.phone,
-        shippingAddress: {
-          street: args.shipping.address,
-          city: args.shipping.city,
-          state: args.shipping.city,
-          zipCode: args.shipping.zipCode,
-          country: args.shipping.country,
-        },
+        name: args.customer.name, // Changed from customerName to name
+        to: args.customer.email,  // Changed from customerEmail to to
         items: args.items.map(item => ({
           id: item.productId,
           name: item.productName,
           price: item.price,
           quantity: item.quantity,
         })),
-        subtotal: args.totals.subtotal,
-        shipping: args.totals.shipping,
-        taxes: args.totals.tax,
-        grandTotal: args.totals.grandTotal,
+        shipping: { // This should be the shipping address object, not the cost
+          address: args.shipping.address,
+          city: args.shipping.city,
+          state: args.shipping.city, // Using city as state since state isn't provided
+          country: args.shipping.country,
+        },
+        totals: { // This should contain the numeric totals
+          shipping: args.totals.shipping, // This is the shipping cost (number)
+          grandTotal: args.totals.grandTotal,
+          taxes: args.totals.tax,
+        },
       });
 
       console.log("📧 Email scheduled for:", args.customer.email);

@@ -1,27 +1,12 @@
 // convex/email.ts
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
-import { components } from "./_generated/api";
-import { Resend } from "@convex-dev/resend";
-
-// Initialize Resend with the correct parameters
-export const resend = new Resend(components.resend, {
-  testMode: false // This allows sending to any email address
-});
 
 export const sendOrderConfirmation = internalAction({
   args: {
     orderId: v.string(),
-    customerName: v.string(),
-    customerEmail: v.string(),
-    customerPhone: v.string(),
-    shippingAddress: v.object({
-      street: v.string(),
-      city: v.string(),
-      state: v.string(),
-      zipCode: v.string(),
-      country: v.string(),
-    }),
+    name: v.string(),
+    to: v.string(),
     items: v.array(
       v.object({
         id: v.string(),
@@ -30,48 +15,78 @@ export const sendOrderConfirmation = internalAction({
         quantity: v.number(),
       })
     ),
-    subtotal: v.number(),
-    shipping: v.number(),
-    taxes: v.number(),
-    grandTotal: v.number(),
+    shipping: v.object({
+      address: v.string(),
+      city: v.string(),
+      state: v.string(),
+      country: v.string(),
+    }),
+    totals: v.object({
+      grandTotal: v.number(),
+      shipping: v.number(),
+      taxes: v.number(),
+    }),
   },
-  handler: async (ctx, args) => {
-    try {
-      console.log("📧 Sending confirmation email to:", args.customerEmail);
-      
-      const emailHtml = generateOrderEmailHtml({
-        orderId: args.orderId,
-        customerName: args.customerName,
-        customerEmail: args.customerEmail,
-        items: args.items,
-        shippingAddress: args.shippingAddress,
-        subtotal: args.subtotal,
-        shippingCost: args.shipping,
-        taxes: args.taxes,
-        grandTotal: args.grandTotal,
-      });
+  handler: async (_, args) => {
+    // Replace with your actual Resend API key from your Resend dashboard
+    const resendApiKey = "re_RtQthcNN_KRuMstVxzA7HgTBb5HAVbZHb";
+    
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY not configured");
+    }
 
-      // Send the email using the Resend component
-      await resend.sendEmail(ctx, {
-        from: "Audiophile <onboarding@resend.dev>",
-        to: args.customerEmail,
+    console.log("Sending order confirmation to:", args.to);
+
+    const subtotal = args.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    const emailHtml = generateOrderEmailHtml({
+      orderId: args.orderId,
+      customerName: args.name,
+      customerEmail: args.to,
+      items: args.items,
+      shippingAddress: {
+        street: args.shipping.address,
+        city: args.shipping.city,
+        state: args.shipping.state,
+        zipCode: "", // Not provided in shipping object
+        country: args.shipping.country,
+      },
+      subtotal,
+      shippingCost: args.totals.shipping,
+      taxes: args.totals.taxes,
+      grandTotal: args.totals.grandTotal,
+    });
+
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendApiKey}`,
+      },
+      body: JSON.stringify({
+        // Use your verified domain here
+        from: "Audiophile Store <busariroqeeb.cv>",
+        to: args.to,
         subject: `Order Confirmation - ${args.orderId}`,
         html: emailHtml,
-      });
+      }),
+    });
 
-      console.log("✅ Email queued for sending to:", args.customerEmail);
-      return { success: true };
-      
-    } catch (error) {
-      console.error("Failed to send email:", error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Unknown error" 
-      };
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to send email: ${error}`);
     }
+
+    const data = await response.json();
+    console.log("Email sent successfully:", data.id);
+    return data;
   },
 });
 
+// Your generateOrderEmailHtml function remains exactly the same
 function generateOrderEmailHtml(order: {
   orderId: string;
   customerName: string;
