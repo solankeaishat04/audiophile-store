@@ -2,6 +2,7 @@
 import { mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel"; // Add 'type' keyword
 
 export const createOrder = mutation({
   args: {
@@ -85,10 +86,9 @@ export const createOrder = mutation({
 export const getOrderById = query({
   args: { orderId: v.string() },
   handler: async (ctx, args) => {
-    // Since orderId from URL is a string, we need to convert it to a Convex ID
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const order = await ctx.db.get(args.orderId as any);
+      // Convert string ID to Convex ID
+      const order = await ctx.db.get(args.orderId as Id<"orders">);
       return order;
     } catch (error) {
       console.error("Error fetching order:", error);

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { FiMenu, FiX, FiShoppingCart } from "react-icons/fi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -137,9 +138,11 @@ const Navbar: React.FC = () => {
       onClick={() => setShowCartModal(false)}
     />
 
-    {/* Modal */}
-   <div className="fixed top-28 right-4 md:right-12 lg:right-24 bg-white rounded-lg p-8 w-[90%] max-w-md z-50 shadow-2xl">
-      <div className="flex justify-between items-center mb-8">
+    {/* Modal - Mobile First Design */}
+    <div className="fixed bottom-0 left-0 right-0 md:bottom-auto md:top-28 md:left-1/2 md:transform md:-translate-x-1/2 lg:left-auto lg:right-24 lg:transform-none bg-white rounded-t-2xl md:rounded-2xl p-6 w-full md:w-[90%] md:max-w-md z-50 shadow-2xl max-h-[80vh] overflow-y-auto">
+      
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-bold tracking-wider uppercase">
           Cart ({getTotalItems()})
         </h3>
@@ -153,26 +156,26 @@ const Navbar: React.FC = () => {
 
       {cartItems && cartItems.length > 0 ? (
         <>
-          {/* Cart Items */}
-          <div className="space-y-6 mb-8">
+          {/* Cart Items - Scrollable Area */}
+          <div className="space-y-4 mb-6 max-h-[45vh] overflow-y-auto">
             {cartItems.map((item) => (
-              <div key={item._id} className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+              <div key={item._id} className="flex items-center justify-between gap-3 bg-gray-50 p-3 rounded-lg">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden border">
                     {item.imageUrl ? (
                       <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-10 h-10 bg-gray-300 rounded-full" />
+                      <div className="w-8 h-8 bg-gray-300 rounded-full" />
                     )}
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-sm uppercase">{item.productName}</p>
-                    <p className="text-gray-500 text-sm font-semibold">$ {item.price.toLocaleString()}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm uppercase truncate">{item.productName}</p>
+                    <p className="text-gray-500 text-xs font-semibold">$ {item.price.toLocaleString()}</p>
                   </div>
                 </div>
 
                 {/* Quantity Controls */}
-                <div className="flex items-center gap-3 bg-gray-100 px-3 py-2 rounded-md">
+                <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-md border">
                   <button 
                     onClick={() => {
                       if (item.quantity > 1) {
@@ -181,16 +184,16 @@ const Navbar: React.FC = () => {
                         handleRemoveItem(item._id);
                       }
                     }}
-                    className="text-gray-400 hover:text-[#D87D4A] font-bold w-4 text-center"
+                    className="text-gray-400 hover:text-[#D87D4A] font-bold w-4 text-center text-sm"
                   >
                     -
                   </button>
-                  <span className="font-bold text-sm w-4 text-center">{item.quantity}</span>
+                  <span className="font-bold text-xs w-4 text-center">{item.quantity}</span>
                   <button 
                     onClick={() => {
                       // Increase quantity logic
                     }}
-                    className="text-gray-400 hover:text-[#D87D4A] font-bold w-4 text-center"
+                    className="text-gray-400 hover:text-[#D87D4A] font-bold w-4 text-center text-sm"
                   >
                     +
                   </button>
@@ -200,28 +203,34 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Total Section */}
-          <div className="flex justify-between items-center mb-8">
-            <span className="text-gray-500 uppercase text-sm">Total</span>
+          <div className="flex justify-between items-center mb-4 border-t border-gray-200 pt-4">
+            <span className="text-gray-500 uppercase text-sm">TOTAL</span>
             <span className="font-bold text-lg">$ {getTotalPrice().toLocaleString()}</span>
           </div>
 
-          {/* Checkout Button */}
-        <button 
-  onClick={() => {
-    setShowCartModal(false); // Close cart modal first
-    navigate("/checkout"); // Then navigate to checkout
-  }}
-  className="w-full bg-[#D87D4A] hover:bg-[#FBAF85] text-white font-bold py-4 rounded-md uppercase tracking-wider text-sm transition-all"
->
-  Checkout
-</button>
-              </>
-            ) : (
-              <p className="text-center text-gray-600 py-8">Your cart is empty</p>
-            )}
+          {/* Checkout Button - Prominent on Mobile */}
+          <button 
+            onClick={() => {
+              setShowCartModal(false);
+              navigate("/checkout");
+            }}
+            className="w-full bg-[#D87D4A] hover:bg-[#FBAF85] text-white font-bold py-4 rounded-lg uppercase tracking-wider text-sm transition-all active:scale-95"
+          >
+            CHECKOUT
+          </button>
+        </>
+      ) : (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FiShoppingCart className="text-gray-400 text-xl" />
           </div>
-        </> 
-      )} 
+          <p className="text-gray-600 font-medium">Your cart is empty</p>
+          <p className="text-gray-400 text-sm mt-1">Add some products to get started</p>
+        </div>
+      )}
+    </div>
+  </>
+)}
     </header>
   );
 };

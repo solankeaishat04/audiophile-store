@@ -1,6 +1,13 @@
 // convex/email.ts
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
+import { components } from "./_generated/api";
+import { Resend } from "@convex-dev/resend";
+
+// Initialize Resend with the correct parameters
+export const resend = new Resend(components.resend, {
+  testMode: false // This allows sending to any email address
+});
 
 export const sendOrderConfirmation = internalAction({
   args: {
@@ -28,14 +35,7 @@ export const sendOrderConfirmation = internalAction({
     taxes: v.number(),
     grandTotal: v.number(),
   },
-  handler: async (_ctx, args) => {
-    const resendApiKey = "re_KhsP5Mz2_CtDrfu8pBRkPt72xVuk7dCGP";
-    
-    if (!resendApiKey) {
-      console.error("RESEND_API_KEY not configured");
-      return { success: false, error: "API key missing" };
-    }
-
+  handler: async (ctx, args) => {
     try {
       console.log("📧 Sending confirmation email to:", args.customerEmail);
       
@@ -51,29 +51,16 @@ export const sendOrderConfirmation = internalAction({
         grandTotal: args.grandTotal,
       });
 
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendApiKey}`,
-        },
-        body: JSON.stringify({
-          from: "Audiophile <onboarding@resend.dev>",
-          to: args.customerEmail,
-          subject: `Order Confirmation - ${args.orderId}`,
-          html: emailHtml,
-        }),
+      // Send the email using the Resend component
+      await resend.sendEmail(ctx, {
+        from: "Audiophile <onboarding@resend.dev>",
+        to: args.customerEmail,
+        subject: `Order Confirmation - ${args.orderId}`,
+        html: emailHtml,
       });
 
-      if (!response.ok) {
-        const error = await response.text();
-        console.error('Resend API error:', error);
-        return { success: false, error: `Failed to send email: ${error}` };
-      }
-
-      const data = await response.json();
-      console.log("✅ Email sent successfully:", data.id);
-      return { success: true, emailId: data.id };
+      console.log("✅ Email queued for sending to:", args.customerEmail);
+      return { success: true };
       
     } catch (error) {
       console.error("Failed to send email:", error);
@@ -222,7 +209,10 @@ function generateOrderEmailHtml(order: {
               <!-- CTA Button -->
               <tr>
                 <td style="padding: 0 30px 30px; text-align: center;">
-                  <a href="https://audiophile-sigma-mauve.vercel.app/orders/${order.orderId}" style="display: inline-block; background-color: #4f46e5; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: 600;">View Your Order</a>
+                  <a href="https://audiophile-store-nine.vercel.app/orders/${order.orderId}" 
+                     style="display: inline-block; background-color: #D87D4A; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: 600;">
+                     View Your Order
+                  </a>
                 </td>
               </tr>
               
