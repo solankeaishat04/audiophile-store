@@ -1,7 +1,10 @@
-// convex/email.ts
+// convex/emailNode.ts
+"use node";
+
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 
+// This directive tells Convex to run this function in Node.js environment
 export const sendOrderConfirmation = internalAction({
   args: {
     orderId: v.string(),
@@ -28,14 +31,15 @@ export const sendOrderConfirmation = internalAction({
     }),
   },
   handler: async (_, args) => {
-    // Replace with your actual Resend API key from your Resend dashboard
-    const resendApiKey = "re_RtQthcNN_KRuMstVxzA7HgTBb5HAVbZHb";
+    // Get credentials from environment variables
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
     
-    if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY not configured");
+    if (!gmailUser || !gmailAppPassword) {
+      throw new Error("Gmail credentials not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables.");
     }
 
-    console.log("Sending order confirmation to:", args.to);
+    console.log("📧 Sending order confirmation to:", args.to);
 
     const subtotal = args.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -60,34 +64,50 @@ export const sendOrderConfirmation = internalAction({
       grandTotal: args.totals.grandTotal,
     });
 
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${resendApiKey}`,
-      },
-      body: JSON.stringify({
-        // Use your verified domain here
-        from: "Audiophile Store <busariroqeeb.cv>",
+    try {
+      // Import nodemailer with TypeScript
+      const nodemailer = await import('nodemailer');
+      
+      // Create email transporter
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: gmailUser,
+          pass: gmailAppPassword,
+        },
+      });
+
+      // Verify connection configuration
+      await transporter.verify();
+      console.log("✅ SMTP connection verified");
+
+      // Send email
+      const info = await transporter.sendMail({
+        from: `"Audiophile Store" <${gmailUser}>`,
         to: args.to,
         subject: `Order Confirmation - ${args.orderId}`,
         html: emailHtml,
-      }),
-    });
+        text: `Hi ${args.name}, your order ${args.orderId} has been confirmed. Total: $${args.totals.grandTotal}. View your order at: https://audiophile-store-nine.vercel.app/orders/${args.orderId}`,
+      });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Failed to send email: ${error}`);
+      console.log("✅ Email sent successfully! Message ID:", info.messageId);
+      console.log("✅ Email sent to:", args.to);
+      
+      return { 
+        success: true, 
+        messageId: info.messageId,
+        recipient: args.to
+      };
+
+    } catch (error) {
+      console.error("❌ Failed to send email:", error);
+      throw new Error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    const data = await response.json();
-    console.log("Email sent successfully:", data.id);
-    return data;
   },
 });
 
-// Your generateOrderEmailHtml function remains exactly the same
-function generateOrderEmailHtml(order: {
+// TypeScript interface for the order data
+interface OrderEmailData {
   orderId: string;
   customerName: string;
   customerEmail: string;
@@ -108,7 +128,10 @@ function generateOrderEmailHtml(order: {
     zipCode: string;
     country: string;
   };
-}): string {
+}
+
+// Your existing HTML template function with TypeScript types
+function generateOrderEmailHtml(order: OrderEmailData): string {
   const itemsHtml = order.items
     .map(
       (item) => `

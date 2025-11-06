@@ -47,25 +47,25 @@ export const createOrder = mutation({
 
       console.log("✅ Order created:", orderId);
 
-      // Schedule email sending (non-blocking)
+      // Schedule email sending using the Node.js action
       await ctx.scheduler.runAfter(0, internal.email.sendOrderConfirmation, {
         orderId: orderId,
-        name: args.customer.name, // Changed from customerName to name
-        to: args.customer.email,  // Changed from customerEmail to to
+        name: args.customer.name,
+        to: args.customer.email,
         items: args.items.map(item => ({
           id: item.productId,
           name: item.productName,
           price: item.price,
           quantity: item.quantity,
         })),
-        shipping: { // This should be the shipping address object, not the cost
+        shipping: {
           address: args.shipping.address,
           city: args.shipping.city,
-          state: args.shipping.city, // Using city as state since state isn't provided
+          state: args.shipping.city, // Using city as state
           country: args.shipping.country,
         },
-        totals: { // This should contain the numeric totals
-          shipping: args.totals.shipping, // This is the shipping cost (number)
+        totals: {
+          shipping: args.totals.shipping,
           grandTotal: args.totals.grandTotal,
           taxes: args.totals.tax,
         },
