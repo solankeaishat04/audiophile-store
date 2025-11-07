@@ -1,10 +1,12 @@
-// convex/emailNode.ts
+// convex/email.ts
 "use node";
 
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 
-// This directive tells Convex to run this function in Node.js environment
+// Use require instead of import for Node.js modules in Convex
+import nodemailer from 'nodemailer';
+
 export const sendOrderConfirmation = internalAction({
   args: {
     orderId: v.string(),
@@ -65,10 +67,7 @@ export const sendOrderConfirmation = internalAction({
     });
 
     try {
-      // Import nodemailer with TypeScript
-      const nodemailer = await import('nodemailer');
-      
-      // Create email transporter
+      // Create email transporter - FIXED: use nodemailer directly
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -77,9 +76,7 @@ export const sendOrderConfirmation = internalAction({
         },
       });
 
-      // Verify connection configuration
-      await transporter.verify();
-      console.log("✅ SMTP connection verified");
+      console.log("✅ SMTP transporter created");
 
       // Send email
       const info = await transporter.sendMail({
@@ -106,8 +103,8 @@ export const sendOrderConfirmation = internalAction({
   },
 });
 
-// TypeScript interface for the order data
-interface OrderEmailData {
+// Your existing HTML template function
+function generateOrderEmailHtml(order: {
   orderId: string;
   customerName: string;
   customerEmail: string;
@@ -128,10 +125,7 @@ interface OrderEmailData {
     zipCode: string;
     country: string;
   };
-}
-
-// Your existing HTML template function with TypeScript types
-function generateOrderEmailHtml(order: OrderEmailData): string {
+}): string {
   const itemsHtml = order.items
     .map(
       (item) => `
