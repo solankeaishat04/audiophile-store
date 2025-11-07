@@ -3,8 +3,6 @@
 
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
-
-// Use require instead of import for Node.js modules in Convex
 import nodemailer from 'nodemailer';
 
 export const sendOrderConfirmation = internalAction({
@@ -38,10 +36,11 @@ export const sendOrderConfirmation = internalAction({
     const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
     
     if (!gmailUser || !gmailAppPassword) {
-      throw new Error("Gmail credentials not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables.");
+      throw new Error("Gmail credentials not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD environment variables in your Convex dashboard.");
     }
 
     console.log("📧 Sending order confirmation to:", args.to);
+    console.log("🔧 Using Gmail account:", gmailUser);
 
     const subtotal = args.items.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -67,16 +66,20 @@ export const sendOrderConfirmation = internalAction({
     });
 
     try {
-      // Create email transporter - FIXED: use nodemailer directly
+      // Create email transporter with Gmail service
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
           user: gmailUser,
-          pass: gmailAppPassword,
+          pass: gmailAppPassword, // Use the app password, NOT your Gmail password
         },
       });
 
       console.log("✅ SMTP transporter created");
+
+      // Verify connection first
+      await transporter.verify();
+      console.log("✅ SMTP connection verified");
 
       // Send email
       const info = await transporter.sendMail({
@@ -84,7 +87,13 @@ export const sendOrderConfirmation = internalAction({
         to: args.to,
         subject: `Order Confirmation - ${args.orderId}`,
         html: emailHtml,
-        text: `Hi ${args.name}, your order ${args.orderId} has been confirmed. Total: $${args.totals.grandTotal}. View your order at: https://audiophile-store-nine.vercel.app/orders/${args.orderId}`,
+        text: generatePlainTextEmail({
+          orderId: args.orderId,
+          customerName: args.name,
+          items: args.items,
+          grandTotal: args.totals.grandTotal,
+          shippingAddress: args.shipping,
+        }),
       });
 
       console.log("✅ Email sent successfully! Message ID:", info.messageId);
@@ -98,12 +107,66 @@ export const sendOrderConfirmation = internalAction({
 
     } catch (error) {
       console.error("❌ Failed to send email:", error);
+      
+      // More detailed error logging
+      if (error instanceof Error) {
+        console.error("❌ Error details:", {
+          message: error.message,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          code: (error as any).code,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          command: (error as any).command,
+        });
+      }
+      
       throw new Error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   },
 });
 
-// Your existing HTML template function
+// Helper function for plain text email
+function generatePlainTextEmail(order: {
+  orderId: string;
+  customerName: string;
+  items: Array<{
+    name: string;
+    price: number;
+    quantity: number;
+  }>;
+  grandTotal: number;
+  shippingAddress: {
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+  };
+}): string {
+  const itemsText = order.items
+    .map(item => `- ${item.name} (Qty: ${item.quantity}) - $${(item.price * item.quantity).toFixed(2)}`)
+    .join('\n');
+
+  return `
+Hi ${order.customerName},
+
+Thank you for your order! We've received your order #${order.orderId} and it's being processed.
+
+ORDER SUMMARY:
+${itemsText}
+
+Shipping Address:
+${order.shippingAddress.address}
+${order.shippingAddress.city}, ${order.shippingAddress.state}
+${order.shippingAddress.country}
+
+Grand Total: $${order.grandTotal.toFixed(2)}
+
+You can view your order details by logging into your account on our website.
+
+Thank you for choosing Audiophile!
+  `.trim();
+}
+
+// Your existing HTML template function (unchanged)
 function generateOrderEmailHtml(order: {
   orderId: string;
   customerName: string;
@@ -235,16 +298,6 @@ function generateOrderEmailHtml(order: {
                       ${order.shippingAddress.country}
                     </p>
                   </div>
-                </td>
-              </tr>
-              
-              <!-- CTA Button -->
-              <tr>
-                <td style="padding: 0 30px 30px; text-align: center;">
-                  <a href="https://audiophile-store-nine.vercel.app/orders/${order.orderId}" 
-                     style="display: inline-block; background-color: #D87D4A; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; font-weight: 600;">
-                     View Your Order
-                  </a>
                 </td>
               </tr>
               
