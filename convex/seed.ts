@@ -109,7 +109,7 @@ export const seedProducts = mutation({
           { quantity: 1, item: "USB-C Charging Cable" },
           { quantity: 1, item: "Travel Pouch" },
         ],
-        image:"/image/image-earphones-yx1.jpg", 
+        image:"/image/image-yx1-earphones.jpg", 
         gallery: ["/image/yx1.jpg", "/image/yx2.jpg", "/image/yx3.jpg"],
         new: true,
       },

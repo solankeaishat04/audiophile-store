@@ -67,21 +67,29 @@ export default function Checkout() {
     }
   }, []);
 
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+ const validateForm = (): boolean => {
+  const newErrors: FormErrors = {};
 
-    // Billing Validation
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone is required";
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
-      newErrors.phone = "Invalid phone format";
-    }
+  // Billing Validation
+  if (!formData.name.trim()) {
+    newErrors.name = "Name is required";
+  } else if (!/^[A-Za-z\s]+$/.test(formData.name.trim())) {
+    newErrors.name = "Name can only contain letters";
+  }
+  
+  if (!formData.email.trim()) {
+    newErrors.email = "Email is required";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    newErrors.email = "Invalid email format";
+  }
+  
+  if (!formData.phone.trim()) {
+    newErrors.phone = "Phone is required";
+  } else if (!/^\+?[\d\s-()]+$/.test(formData.phone)) {
+    newErrors.phone = "Invalid phone format";
+  }
+
+  
 
     // Shipping Validation
     if (!formData.address.trim()) newErrors.address = "Address is required";
@@ -251,7 +259,7 @@ export default function Checkout() {
                 <h2 className="text-lg font-bold text-[#D87D4A] mb-6 uppercase">Billing Details</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-bold mb-2">Name</label>
+                   <label className="block text-sm font-bold mb-2">Name</label>
 <input
   type="text"
   value={formData.name}
@@ -262,6 +270,12 @@ export default function Checkout() {
       : 'border-gray-300'
   }`}
   placeholder="Insert your name"
+  onBlur={(e) => {
+    const value = e.target.value.trim();
+    if (value && !/^[A-Za-z\s]+$/.test(value)) {
+      setErrors(prev => ({ ...prev, name: "Name can only contain letters" }));
+    }
+  }}
 />
 {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
 </div>
