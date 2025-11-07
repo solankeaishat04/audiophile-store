@@ -252,15 +252,19 @@ export default function Checkout() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold mb-2">Name</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className={`w-full border rounded-md px-4 py-3 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
-                      placeholder="Alexei Ward"
-                    />
-                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-                  </div>
+<input
+  type="text"
+  value={formData.name}
+  onChange={(e) => handleInputChange('name', e.target.value)}
+  className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 focus:outline-none focus:border-[#D87D4A] focus:ring-1 focus:ring-[#D87D4A] ${
+    errors.name 
+      ? 'border-red-500' 
+      : 'border-gray-300'
+  }`}
+  placeholder="Insert your name"
+/>
+{errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+</div>
 
                   <div>
                     <label className="block text-sm font-bold mb-2">Email Address</label>
@@ -268,7 +272,7 @@ export default function Checkout() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className={`w-full border rounded-md px-4 py-3 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="alexei@mail.com"
                     />
                     {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -280,7 +284,7 @@ export default function Checkout() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className={`w-full border rounded-md px-4 py-3 ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="+1 202-555-0136"
                     />
                     {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
@@ -298,7 +302,7 @@ export default function Checkout() {
                       type="text"
                       value={formData.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
-                      className={`w-full border rounded-md px-4 py-3 ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 ${errors.address ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="1137 Williams Avenue"
                     />
                     {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
@@ -311,7 +315,7 @@ export default function Checkout() {
                         type="text"
                         value={formData.zipCode}
                         onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                        className={`w-full border rounded-md px-4 py-3 ${errors.zipCode ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 ${errors.zipCode ? 'border-red-500' : 'border-gray-300'}`}
                         placeholder="10001"
                       />
                       {errors.zipCode && <p className="text-red-500 text-sm mt-1">{errors.zipCode}</p>}
@@ -323,7 +327,7 @@ export default function Checkout() {
                         type="text"
                         value={formData.city}
                         onChange={(e) => handleInputChange('city', e.target.value)}
-                        className={`w-full border rounded-md px-4 py-3 ${errors.city ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 ${errors.city ? 'border-red-500' : 'border-gray-300'}`}
                         placeholder="New York"
                       />
                       {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
@@ -336,7 +340,7 @@ export default function Checkout() {
                       type="text"
                       value={formData.country}
                       onChange={(e) => handleInputChange('country', e.target.value)}
-                      className={`w-full border rounded-md px-4 py-3 ${errors.country ? 'border-red-500' : 'border-gray-300'}`}
+                      className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 ${errors.country ? 'border-red-500' : 'border-gray-300'}`}
                       placeholder="United States"
                     />
                     {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country}</p>}
@@ -351,7 +355,11 @@ export default function Checkout() {
                   <div>
                     <label className="block text-sm font-bold mb-4">Payment Method</label>
                     <div className="space-y-4">
-                      <label className="flex items-center border rounded-md p-4 cursor-pointer">
+                      <label className={`flex items-center border rounded-md p-4 cursor-pointer transition-all ${
+                        formData.paymentMethod === "e-Money" 
+                          ? 'border-[#D87D4A]' 
+                          : 'border-gray-300 hover:border-[#D87D4A]'
+                      }`}>
                         <input
                           type="radio"
                           name="paymentMethod"
@@ -360,9 +368,13 @@ export default function Checkout() {
                           onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
                           className="mr-4"
                         />
-                        <span>e-Money</span>
+                        <span className="text-sm font-bold">e-Money</span>
                       </label>
-                      <label className="flex items-center border rounded-md p-4 cursor-pointer">
+                      <label className={`flex items-center border rounded-md p-4 cursor-pointer transition-all ${
+                        formData.paymentMethod === "Cash on Delivery" 
+                          ? 'border-[#D87D4A]' 
+                          : 'border-gray-300 hover:border-[#D87D4A]'
+                      }`}>
                         <input
                           type="radio"
                           name="paymentMethod"
@@ -371,7 +383,7 @@ export default function Checkout() {
                           onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
                           className="mr-4"
                         />
-                        <span>Cash on Delivery</span>
+                        <span className="text-sm font-bold">Cash on Delivery</span>
                       </label>
                     </div>
                   </div>
@@ -384,7 +396,13 @@ export default function Checkout() {
                           type="text"
                           value={formData.eMoneyNumber}
                           onChange={(e) => handleInputChange('eMoneyNumber', e.target.value)}
-                          className={`w-full border rounded-md px-4 py-3 ${errors.eMoneyNumber ? 'border-red-500' : 'border-gray-300'}`}
+                          className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 ${
+                            errors.eMoneyNumber 
+                              ? 'border-red-500' 
+                              : formData.eMoneyNumber 
+                                ? 'border-gray-300' 
+                                : 'border-gray-300'
+                          }`}
                           placeholder="238521993"
                         />
                         {errors.eMoneyNumber && <p className="text-red-500 text-sm mt-1">{errors.eMoneyNumber}</p>}
@@ -395,7 +413,13 @@ export default function Checkout() {
                           type="password"
                           value={formData.eMoneyPIN}
                           onChange={(e) => handleInputChange('eMoneyPIN', e.target.value)}
-                          className={`w-full border rounded-md px-4 py-3 ${errors.eMoneyPIN ? 'border-red-500' : 'border-gray-300'}`}
+                          className={`w-full border rounded-md px-4 py-3 text-sm font-bold placeholder-gray-400 ${
+                            errors.eMoneyPIN 
+                              ? 'border-red-500' 
+                              : formData.eMoneyPIN 
+                                ? 'border-gray-300' 
+                                : 'border-gray-300'
+                          }`}
                           placeholder="6891"
                           maxLength={4}
                         />
@@ -416,67 +440,67 @@ export default function Checkout() {
               </section>
             </div>
 
-            {/* Right Column - Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg p-8 sticky top-8">
-                <h2 className="text-lg font-bold mb-6 uppercase">Summary</h2>
-                
-                {/* Cart Items */}
-                <div className="space-y-6 mb-8">
-                  {cartItems?.map((item) => (
-                    <div key={item._id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
-                          {item.imageUrl && (
-                            <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm">{item.productName}</p>
-                          <p className="text-gray-500 text-sm">$ {(item.price || 0).toLocaleString()}</p>
-                        </div>
-                      </div>
-                      <div className="text-gray-500 font-bold">
-                        x{item.quantity}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Totals */}
-                <div className="space-y-4 mb-8">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 uppercase">Total</span>
-                    <span className="font-bold">$ {getTotalPrice().toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 uppercase">Shipping</span>
-                    <span className="font-bold">$ {shippingCost}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 uppercase">Tax (VAT)</span>
-                    <span className="font-bold">$ {tax}</span>
-                  </div>
-                  <div className="flex justify-between border-t border-gray-300 pt-4">
-                    <span className="text-gray-500 uppercase">Grand Total</span>
-                    <span className="font-bold text-[#D87D4A]">$ {grandTotal.toLocaleString()}</span>
-                  </div>
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-[#D87D4A] hover:bg-[#FBAF85] text-white font-bold py-4 rounded-md uppercase tracking-wider text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? "Processing..." : "Continue & Pay"}
-                </button>
-
-                {errors.submit && (
-                  <p className="text-red-500 text-sm mt-4 text-center">{errors.submit}</p>
-                )}
-              </div>
+          {/* Right Column - Order Summary */}
+<div className="lg:col-span-1">
+  <div className="bg-white rounded-lg p-8 sticky top-28">
+    <h2 className="text-lg font-bold mb-6 uppercase">Summary</h2>
+    
+    {/* Cart Items */}
+    <div className="space-y-6 mb-8">
+      {cartItems?.map((item) => (
+        <div key={item._id} className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+              {item.imageUrl && (
+                <img src={item.imageUrl} alt={item.productName} className="w-full h-full object-cover" />
+              )}
             </div>
+            <div>
+              <p className="font-bold text-sm">{item.productName}</p>
+              <p className="text-gray-500 text-sm">$ {(item.price || 0).toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="text-gray-500 font-bold">
+            x{item.quantity}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Totals */}
+    <div className="space-y-4 mb-8">
+      <div className="flex justify-between">
+        <span className="text-gray-500 uppercase">Total</span>
+        <span className="font-bold">$ {getTotalPrice().toLocaleString()}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-500 uppercase">Shipping</span>
+        <span className="font-bold">$ {shippingCost}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-500 uppercase">Tax (VAT)</span>
+        <span className="font-bold">$ {tax}</span>
+      </div>
+      <div className="flex justify-between border-t border-gray-300 pt-4">
+        <span className="text-gray-500 uppercase">Grand Total</span>
+        <span className="font-bold text-[#D87D4A]">$ {grandTotal.toLocaleString()}</span>
+      </div>
+    </div>
+
+    {/* Submit Button */}
+    <button
+      type="submit"
+      disabled={isSubmitting}
+      className="w-full bg-[#D87D4A] hover:bg-[#FBAF85] text-white font-bold py-4 rounded-md uppercase tracking-wider text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {isSubmitting ? "Processing..." : "Continue & Pay"}
+    </button>
+
+    {errors.submit && (
+      <p className="text-red-500 text-sm mt-4 text-center">{errors.submit}</p>
+    )}
+  </div>
+</div>
           </form>
         </div>
       </div>
